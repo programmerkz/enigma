@@ -1,4 +1,4 @@
-from src.rotor import ScrambleCypher
+from src.rotor import ScrambleCypher, SubstitutionCypher
 from src.tools import shuffle_list
 
 
@@ -24,6 +24,20 @@ cyph = ScrambleCypher(scramble_sequence)
 input = alphabet
 enc = ''.join(d_rev[cyph.forward(d[ch])] for ch in input)
 dec = ''.join(d_rev[cyph.forward(d[ch], reverse=True)] for ch in enc)
+
+assert dec == input, 'Decrypted string is not equal to input'
+print(input, enc, dec, sep='\n', end='\n\n')
+
+
+# example 3
+alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 !@#$%^&*()_+-=,.'
+alphabet_encrypted = ''.join(shuffle_list(list(alphabet)))
+
+cyph_2 = SubstitutionCypher(alphabet, alphabet_encrypted)
+
+input = alphabet
+enc = cyph_2.forward(input)
+dec = cyph_2.forward(enc, reverse=True)
 
 assert dec == input, 'Decrypted string is not equal to input'
 print(input, enc, dec, sep='\n', end='\n\n')
