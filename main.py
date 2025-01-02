@@ -1,4 +1,5 @@
-from src.rotor import ScrambleCypher, SubstitutionCypher
+from src.rotor import ScrambleCypher, ScrambleCypher26, SubstitutionCypher
+from src.settings import EnigmaRotors
 from src.tools import shuffle_list
 
 
@@ -38,6 +39,18 @@ cyph_2 = SubstitutionCypher(alphabet, alphabet_encrypted)
 input = alphabet
 enc = cyph_2.forward(input)
 dec = cyph_2.forward(enc, reverse=True)
+
+assert dec == input, 'Decrypted string is not equal to input'
+print(input, enc, dec, sep='\n', end='\n\n')
+
+
+# example 4
+alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+cyph_3 = ScrambleCypher26.get_enigma_rotor(EnigmaRotors.ROTOR_I)
+
+input = alphabet
+enc = ''.join(chr(ord('A') + cyph_3.forward(ord(ch) - ord('A'))) for ch in input)
+dec = ''.join(chr(ord('A') + cyph_3.forward(ord(ch) - ord('A'), reverse=True)) for ch in enc)
 
 assert dec == input, 'Decrypted string is not equal to input'
 print(input, enc, dec, sep='\n', end='\n\n')
