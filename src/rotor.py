@@ -1,5 +1,41 @@
 from __future__ import annotations
-from src.settings import EnigmaRotors
+from src.settings import EnigmaRotors, EnigmaReflectors
+
+
+class EnigmaMachine:
+    KEY_BOARD = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+    def __init__(self, rotors: list[EnigmaRotor], reflector: EnigmaReflector):
+        if len(rotors) < 1:
+            raise ValueError('Argument rotors must contain at least one rotor.')
+
+        self.rotors = rotors
+        self.reflector = reflector
+        self._key_board_set = set(self.KEY_BOARD)
+
+    def forward(self, pin_id: int) -> int:
+        for i in range(len(self.rotors)):
+            pin_id = self.rotors[i].forward(pin_id)
+
+        pin_id = self.reflector.forward(pin_id)
+
+        for i in range(len(self.rotors) - 1, -1, -1):
+            pin_id = self.rotors[i].forward(pin_id, reverse=True)
+
+        return pin_id
+
+    def encrypt(self, s: str) -> str:
+        r: list[str] = []
+        for ch in s:
+            if ch not in self._key_board_set:
+                raise ValueError(f'Simbol {ch=} is not on the Enigma keyboard.')
+
+            pin_id = ord(ch) - ord('A')
+            out_pin = self.forward(pin_id)
+            out_letter = chr(out_pin + ord('A'))
+            r.append(out_letter)
+
+        return ''.join(r)
 
 
 class Rotor:
@@ -15,15 +51,25 @@ class Rotor:
             raise ValueError(err_msg)
 
         input = (pin_id + self.position) % self.number_of_pins
-        return self.cypher.forward(input)
+        return self.cypher.forward(input, reverse)
 
 
 class EnigmaRotor(Rotor):
     def __init__(self, scramble_cypher: ScrambleCypher26):
         super().__init__(scramble_cypher)
 
-    def get_enigma_rotor(self, rotor_id: EnigmaRotors) -> Rotor:
-        return Rotor(ScrambleCypher26.get_enigma_rotor(rotor_id))
+    @classmethod
+    def get_enigma_rotor(cls, rotor_id: EnigmaRotors) -> EnigmaRotor:
+        return EnigmaRotor(ScrambleCypher26.get_enigma_rotor(rotor_id))
+
+
+class EnigmaReflector(Rotor):
+    def __init__(self, scramble_cypher: ScrambleCypher26):
+        super().__init__(scramble_cypher)
+
+    @classmethod
+    def get_enigma_reflector(cls, reflector_id: EnigmaReflectors) -> EnigmaReflector:
+        return EnigmaReflector(ScrambleCypher26.get_enigma_reflector(reflector_id))
 
 
 class ScrambleCypher:
@@ -86,6 +132,20 @@ class ScrambleCypher26(ScrambleCypher):
     @classmethod
     def get_enigma_rotor(cls, rotor_id: EnigmaRotors) -> ScrambleCypher26:
         seq = [ord(ch) - ord('A') for ch in rotor_id.value]
+
+        return ScrambleCypher26(seq)
+
+    @classmethod
+    def get_enigma_reflector(cls, reflector_id: EnigmaReflectors) -> ScrambleCypher26:
+        pairs = reflector_id.value.split()
+        seq = [-1] * len(pairs * 2)
+
+        for p in pairs:
+            a, b = p[1], p[2]
+            seq[ord(a) - ord('A')] = ord(b) - ord('A')
+            seq[ord(b) - ord('A')] = ord(a) - ord('A')
+
+        assert -1 not in seq, 'Sequence is not set properly'
 
         return ScrambleCypher26(seq)
 
