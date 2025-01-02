@@ -1,3 +1,7 @@
+from __future__ import annotations
+from src.settings import EnigmaRotors
+
+
 class Rotor:
     def __init__(self, substitution_cipher: list[int]):
         pass
@@ -47,6 +51,24 @@ class ScrambleCypher:
             s.remove(n)
 
         return len(s) == 0
+
+
+class ScrambleCypher26(ScrambleCypher):
+    ALPHABET_LEN = 26
+
+    def __init__(self, scramble_sequence: list[int]):
+        if err_len := len(scramble_sequence) != self.ALPHABET_LEN:
+            err_msg = (f'The length of scramble_sequence argument ({err_len}) '
+                       f'must be {self.ALPHABET_LEN}')
+            raise ValueError(err_msg)
+
+        super().__init__(scramble_sequence)
+
+    @classmethod
+    def get_enigma_rotor(cls, rotor_id: EnigmaRotors) -> ScrambleCypher26:
+        seq = [ord(ch) - ord('A') for ch in rotor_id.value]
+
+        return ScrambleCypher26(seq)
 
 
 class SubstitutionCypher:
