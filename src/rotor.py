@@ -3,8 +3,19 @@ from src.settings import EnigmaRotors
 
 
 class Rotor:
-    def __init__(self, substitution_cipher: list[int]):
-        pass
+    def __init__(self, scramble_cypher: ScrambleCypher26):
+        self.cypher = scramble_cypher
+        self.position = 0
+
+    def forward(self, pin_id: int, reverse: bool = False) -> int:
+        if pin_id < 0 or pin_id > 25:
+            raise ValueError(f'Argument {pin_id=} must be in range (0, 25) including both ends.')
+
+        input = (pin_id + self.position) % 26
+        return self.cypher.forward(input)
+
+    def get_enigma_rotor(self, rotor_id: EnigmaRotors) -> Rotor:
+        return Rotor(ScrambleCypher26.get_enigma_rotor(rotor_id))
 
 
 class ScrambleCypher:
