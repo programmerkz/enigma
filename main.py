@@ -1,5 +1,6 @@
-from src.rotor import ScrambleCypher, ScrambleCypher26, SubstitutionCypher
-from src.settings import EnigmaRotors
+from src.rotor import (EnigmaMachine, EnigmaReflector, EnigmaRotor,
+                       ScrambleCypher, ScrambleCypher26, SubstitutionCypher)
+from src.settings import EnigmaRotors, EnigmaReflectors
 from src.tools import shuffle_list
 
 
@@ -53,4 +54,21 @@ enc = ''.join(chr(ord('A') + cyph_3.forward(ord(ch) - ord('A'))) for ch in input
 dec = ''.join(chr(ord('A') + cyph_3.forward(ord(ch) - ord('A'), reverse=True)) for ch in enc)
 
 assert dec == input, 'Decrypted string is not equal to input'
+print(input, enc, dec, sep='\n', end='\n\n')
+
+
+# example 5
+rotors: list[EnigmaRotor] = []
+rotors.append(EnigmaRotor.get_enigma_rotor(EnigmaRotors.ROTOR_I))
+# rotors.append(EnigmaRotor.get_enigma_rotor(EnigmaRotors.ROTOR_II))
+# rotors.append(EnigmaRotor.get_enigma_rotor(EnigmaRotors.ROTOR_III))
+reflector = EnigmaReflector.get_enigma_reflector(EnigmaReflectors.REFLECTOR_B)
+
+enigma = EnigmaMachine(rotors, reflector)
+
+input = enigma.KEY_BOARD
+enc = enigma.encrypt(input)
+dec = enigma.encrypt(enc)
+
+# assert dec == input, 'Decrypted string is not equal to input'
 print(input, enc, dec, sep='\n', end='\n\n')
