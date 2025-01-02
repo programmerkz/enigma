@@ -47,3 +47,42 @@ class ScrambleCypher:
             s.remove(n)
 
         return len(s) == 0
+
+
+class SubstitutionCypher:
+    def __init__(self, alphabet: str, alphabet_encrypted: str):
+        if self._validate_alphabet(alphabet, alphabet_encrypted) is False:
+            err_msg = ('Alphabet and Encrypted alphabet strings must be the same length '
+                       'and consist of same letter set.')
+            raise ValueError(err_msg)
+
+        self.encrypt_alphabet: dict[str, str] = dict()
+        self.decrypt_alphabet: dict[str, str] = dict()
+
+        for i in range(len(alphabet)):
+            self.encrypt_alphabet[alphabet[i]] = alphabet_encrypted[i]
+            self.decrypt_alphabet[alphabet_encrypted[i]] = alphabet[i]
+
+    def forward(self, s: str, reverse: bool = False) -> str:
+        if err_ch := self._validate_input(s) != '':
+            raise ValueError(f'Input contains a char ({err_ch}) that is not in alpabet.')
+
+        r = [' '] * len(s)
+        for i, ch in enumerate(s):
+            if reverse is False:
+                r[i] = self.encrypt_alphabet[ch]
+            else:
+                r[i] = self.decrypt_alphabet[ch]
+
+        return ''.join(r)
+
+    def _validate_input(self, s: str) -> str:
+        for ch in s:
+            if ch not in self.encrypt_alphabet:
+                return ch
+
+        return ''
+
+    def _validate_alphabet(self, alphabet: str, alphabet_encrypted: str) -> bool:
+        return (len(alphabet) == len(alphabet_encrypted)
+                and set(alphabet) == set(alphabet_encrypted))
