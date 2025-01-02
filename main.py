@@ -65,8 +65,9 @@ rotors.append(EnigmaRotor.get_enigma_rotor(EnigmaRotors.ROTOR_I))
 reflector = EnigmaReflector.get_enigma_reflector(EnigmaReflectors.REFLECTOR_B)
 
 enigma = EnigmaMachine(rotors, reflector)
+enigma.rotors[0].position = 1
 
-input = enigma.KEY_BOARD
+input = 'C'#enigma.KEY_BOARD
 enc = enigma.encrypt(input)
 dec = enigma.encrypt(enc)
 

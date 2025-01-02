@@ -14,13 +14,18 @@ class EnigmaMachine:
         self._key_board_set = set(self.KEY_BOARD)
 
     def forward(self, pin_id: int) -> int:
+        print(f'enigma_forward({pin_id=})')
+
         for i in range(len(self.rotors)):
             pin_id = self.rotors[i].forward(pin_id)
+            print(f'enigma_forward(...), rotor_{i}, {pin_id=}')
 
         pin_id = self.reflector.forward(pin_id)
+        print(f'enigma_forward(...), reflector, {pin_id=}')
 
         for i in range(len(self.rotors) - 1, -1, -1):
             pin_id = self.rotors[i].forward(pin_id, reverse=True)
+            print(f'enigma_forward(...), rotor_{i}, REV, {pin_id=}')
 
         return pin_id
 
@@ -50,8 +55,19 @@ class Rotor:
                        f'(0, {self.number_of_pins - 1}) including both ends.')
             raise ValueError(err_msg)
 
-        input = (pin_id + self.position) % self.number_of_pins
-        return self.cypher.forward(input, reverse)
+        print(f'rotor_forward({pin_id=}, {reverse}), {self.position=}')
+
+        if not reverse:
+            pin_id = (pin_id + self.position) % self.number_of_pins
+        else:
+            pin_id = (pin_id - self.position) % self.number_of_pins
+
+        print(f'{pin_id=}')
+
+        if not reverse:
+            return (self.cypher.forward(pin_id, reverse) - self.position) % self.number_of_pins
+        else:
+            return (self.cypher.forward(pin_id, reverse) + self.position) % self.number_of_pins
 
 
 class EnigmaRotor(Rotor):
