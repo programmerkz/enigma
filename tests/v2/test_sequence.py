@@ -1,5 +1,5 @@
 from pytest import raises
-from src.enigma_v2.sequence import SubstitutionSequence
+from src.enigma_v2.sequence import SubstitutionSequence, SubstitutionSequenceBuilder
 
 
 class TestSequence:
@@ -61,3 +61,76 @@ class TestSequence:
         dec = [ss_rev.seq[i] for i in enc]
 
         assert input == dec
+
+
+class TestSequenceBuilder:
+    def test_empty(self):
+        with raises(ValueError):
+            SubstitutionSequenceBuilder.make_random_sequence(0)
+
+    def test_seq_too_long(self):
+        with raises(ValueError):
+            seq_len = SubstitutionSequenceBuilder.MAX_SEQ_LEN + 1
+            SubstitutionSequenceBuilder.make_random_sequence(seq_len)
+
+    def test_min_seq_len(self):
+        seq_len = 1
+        ss = SubstitutionSequenceBuilder.make_random_sequence(seq_len)
+
+        assert ss.seq_len == seq_len
+
+    def test_max_seq_len(self):
+        seq_len = SubstitutionSequenceBuilder.MAX_SEQ_LEN
+        ss = SubstitutionSequenceBuilder.make_random_sequence(seq_len)
+
+        assert ss.seq_len == seq_len
+
+    def test_make_by_alphabet_abc(self):
+        alpha = 'abc'
+        scrambled = 'bac'
+
+        ss = SubstitutionSequenceBuilder.make_sequence_by_alphabet(alpha, scrambled)
+
+        assert ss.seq == [1, 0, 2]
+
+    def test_make_by_alphabet_abc_123(self):
+        alpha = 'abc123'
+        scrambled = 'b1a2c3'
+
+        ss = SubstitutionSequenceBuilder.make_sequence_by_alphabet(alpha, scrambled)
+
+        assert ss.seq == [1, 3, 0, 4, 2, 5]
+
+    def test_make_by_alphabet_diff_len(self):
+        alpha = 'abc'
+        scrambled = 'ba'
+
+        with raises(ValueError):
+            SubstitutionSequenceBuilder.make_sequence_by_alphabet(alpha, scrambled)
+
+    def test_make_by_alphabet_diff_abc(self):
+        alpha = 'abc'
+        scrambled = 'cbe'
+
+        with raises(ValueError):
+            SubstitutionSequenceBuilder.make_sequence_by_alphabet(alpha, scrambled)
+
+    def test_make_by_26_eng_cap_letters(self):
+        scrambled = 'ZLCXPWOYDFKAHIUSNMBQTVGRJE'
+        seq = [25, 11, 2, 23, 15, 22, 14, 24, 3, 5, 10, 0, 7, 8, 20, 18, 13, 12, 1, 16, 19, 21, 6, 17, 9, 4]
+
+        ss = SubstitutionSequenceBuilder.make_sequence_by_26_eng_cap_letters(scrambled)
+
+        assert ss.seq == seq
+
+    def test_make_by_26_eng_cap_letters_gaps(self):
+        scrambled = 'ZLCXPWOYDFKAHIUSNMBQTV_RJE'
+
+        with raises(ValueError):
+            SubstitutionSequenceBuilder.make_sequence_by_26_eng_cap_letters(scrambled)
+
+    def test_make_by_26_eng_cap_letters_dubs(self):
+        scrambled = 'ZZCXPWOYDFKAHIUSNMBQTVGRJE'
+
+        with raises(ValueError):
+            SubstitutionSequenceBuilder.make_sequence_by_26_eng_cap_letters(scrambled)
