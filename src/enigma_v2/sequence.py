@@ -3,20 +3,35 @@ from random import randint, seed
 
 
 class SubstitutionSequence:
-    def __init__(self, seq: list[int]):
-        if not self._is_valid_seq(seq):
+    def __init__(self, sequence: list[int]):
+        if not self._is_valid_seq(sequence):
             raise ValueError()
 
-        self.seq = seq
-        self.seq_len = len(seq)
+        self._sequence = sequence
+        self._lenght = len(sequence)
+
+    def substitute(self, i: int) -> int:
+        if not isinstance(i, int):
+            raise TypeError(f'Argument type {type(i)=} must be int.')
+
+        if i < 0 or i >= self.length:
+            err_msg = (f'Argument {i=} must be in range '
+                       f'(0, {self.length - 1}) including both ends.')
+            raise ValueError(err_msg)
+
+        return self._sequence[i]
 
     def make_reverse_sequence(self) -> SubstitutionSequence:
-        rev = [-1] * self.seq_len
+        rev = [-1] * self.length
 
-        for i, n in enumerate(self.seq):
+        for i, n in enumerate(self._sequence):
             rev[n] = i
 
         return SubstitutionSequence(rev)
+
+    @property
+    def length(self) -> int:
+        return self._lenght
 
     def _is_valid_seq(self, seq: list[int]) -> bool:
         return len(seq) > 0 and max(seq) == len(seq) - 1 and len(seq) == len(set(seq))
